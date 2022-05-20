@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: An AWS Serverless Specification template describing your function.
+Resources:
+  HitsAnalyze:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: src/
+      Handler: app.handler
+      Runtime: python3.7
+      Description: 'Analyzes the hits tsv files and writes the output to consumption bucket'
+      Layers: [!Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:pandas:3', !Sub 'arn:aws:lambda:us-east-1:668099181075:layer:AWSLambda-Python38-SciPy1x:107']
+      MemorySize: 512
+      Timeout: 900
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref HitsBucket
+            Events: s3:ObjectCreated:*
+  HitsBucket:
+      Type: 'AWS::S3::Bucket'
+      BucketName: 'adobe-hitsdata-test'
